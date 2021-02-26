@@ -5,31 +5,22 @@ Date: 2-24-2021
 This script simply tracks weight loss over time.
 Progress visualized as a connected scatter plot.
 
-The next step is to create a GitHub repository
+The next step is to create a GitHub repository - done
+The next next step is to branch off a GUI version of this app
 """
 from datetime import date, datetime
 import csv
-import os
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
 
 def log_weight():
-    logdict = get_user_input()
     filename = "weightLog.csv"
     fields = ["date", "weight in lbs"]
 
-    if os.path.exists(filename) is False:  # start a new log
-        with open(filename, 'w') as csvfile:
-            # creating a csv dict writer object
+    with open(filename, 'a+', newline="") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fields)
-
-            # add dictionary as row in the csv
-            writer.writerows(logdict)
-    else:  # add to existing log
-        with open(filename, 'a+', newline="") as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=fields)
-            writer.writerows(logdict)
+            writer.writerows(get_user_input())
 
 
 def get_user_input():
