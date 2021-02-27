@@ -1,0 +1,10 @@
+TODO
+
+1) fix weight ValueError exception  - done
+display an error message
+append only when fixed to a float value
+
+2) single quit closes all windows including graph - done
+- can manage this by plotting graph in GUI view
+
+3) fill entry box with record for a date, if it exists
