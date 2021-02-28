@@ -3,6 +3,10 @@
 @author fayefong
 
 TODO bind widget events appropriately
+TODO documentation
+TODO hierarchy
+TODO comprehension review
+
 """
 import tkinter as tk
 from tkcalendar import Calendar, DateEntry

@@ -18,11 +18,9 @@ def update_graph():
         for row in records:  # grabs data from CSV and puts into k,v in dict
             d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # strs to datetime and float weights
 
-    sorted_dates = sorted(d)  # returns an interable so prefer list comprehensions
-    x = [ k for k in sorted_dates ]  # datetime objs sorted so that line graph connects in order
-    y = [ d[k] for k in sorted_dates ]
-
-    return x, y
+    sorted_dates = sorted(d)  # returns sorted list of keys
+    sorted_weights = [ d[k] for k in sorted_dates ]
+    return sorted_dates, sorted_weights
 
 """Handles submit button clicks by appropriately modifying CSV file
 """
