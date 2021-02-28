@@ -2,8 +2,14 @@
 
 @author fayefong
 
+
 Next step is to clean up inefficient code and document properly
+    part of which is binding the submit func to the plot button also for intuitive use
 Proper class design and package hierarchy
+Also useful to include statistics report under buttons such as differential, weekly average, BMI
+diet recommendations for daily calorie consumption
+
+Also different view modes such as weekly or all-time
 ---
 
 Please advise on button handler where you pass references to the button, the window, etc
@@ -64,7 +70,6 @@ def delete_record(date_ch):
 
 # Collects new data in list of dicts
 def submit_handler(cal, e_w):
-
     date_recorded = cal.get_date().strftime('%b-%d-%Y')
     weight = e_w.get()
 
@@ -75,12 +80,13 @@ def submit_handler(cal, e_w):
 
     try:  # validates weight input
         float(weight)
+
         # check if this record exists
-        if lookup_record(date_recorded) != None:
+        if lookup_record(date_recorded) != "":  # this handles several casees
             replace_value(date_recorded, weight)
         else: # creates a new weight record
             logdict.append({"date": date_recorded, "weight in lbs": weight})
-            # write_new_data(logdict) TODO should immediately update csv when submit
+            # write_new_data(logdict) # should immediately update csv when submit
         e_w.config(fg='grey')  # greys out the text when submitted
     except ValueError:
         # print("Not a valid weight value.")
@@ -101,24 +107,10 @@ def write_new_data(d):
     # logdict.clear()
 
 
-# there should be a view graph button that fires new data and generates graph
-# def show_graph():
-#     write_new_data()
-#     logdict.clear()  # clears current logdict for new data entry
-#     lg.show_log("GUI_weightLog.csv")
-
-
-def custom_quit():
-    master.quit()
-    # how to close matplotlib window simultaneously
-    # there are two loops happening
-    # so presently requires two button clicks on quit to close all
-
-
-
-
-
 def update_graph():
+
+    # TO DO add function where when you hit plot right after a new data entry
+    # it updates the log and the graph
 
     write_new_data(logdict)
     logdict.clear()  # clears current logdict for new data entry
@@ -168,13 +160,22 @@ def update_graph():
 #     e_w.insert(0, text)
 
 def lookup_record(date_str):
-    csv_file = csv.reader(open('GUI_weightLog.csv', 'r'), delimiter=',')
+
+    try:
+        csv_file = csv.reader(open("GUI_weightLog.csv", 'r'), delimiter=',')
+    except FileNotFoundError:  # handles no file exists
+        with open("GUI_weightLog.csv", 'w') as csv_file:
+            pass
+
+    # handle empty file case
+    if os.stat("GUI_weightLog.csv").st_size == 0:
+        return ""
 
     for row in csv_file:
         if row[0] == date_str:
             return row[1]
-    # when no record is found matching date requested return empty str
-    # return ""  # handles empty file case and missing record
+
+    return ""     # when no record is found matching date requested return empty str
 
 def send_report():
     lg.email_report("Y")
@@ -182,7 +183,7 @@ def send_report():
 
 if __name__ == '__main__':
 
-    # replace_value("Feb-26-2021", "99")
+    # handle the first run of this program where no file exists yet
 
     def print_sel(e): # define a function inside a function to fill with existing records
         e_w.config(fg='black') # return weight entry text to black for new submission
@@ -226,7 +227,7 @@ if __name__ == '__main__':
     tk.Button(master,
               text='Quit',
               font=button_style,
-              command=custom_quit).grid(row=3,
+              command=master.quit).grid(row=3,
                                         column=0,
                                         sticky=tk.W,
                                         pady=10,
@@ -243,12 +244,17 @@ if __name__ == '__main__':
                                                               pady=10,
                                                               padx=100)
 
-
+    # fascinating combined functions and other Python eloquence
+    # def combineFunc(self, *funcs):
+    #     def combinedFunc(*args, **kwargs):
+    #         for f in funcs:
+    #             f(*args, **kwargs)
+    #     return combinedFunc
 
     # show button to plot updated graph
     tk.Button(master,
               text='Plot',
-              font=button_style,
+              font=button_style,  # TO DO bind multiple commands to this to update log also
               command=update_graph).grid(row=4,
                                          column=1,
                                          sticky=tk.W,
