@@ -1,11 +1,28 @@
 """Defines the controller functions for WeightLogger App
-
+@author fayefong
 """
 import yagmail
 import tkinter as tk
 import csv
 import os
+from datetime import datetime
 
+
+"""Collects k,v data from current csv file, 
+converts to sorted list of datetime objects
+"""
+def update_graph():
+    d = {}
+    with open("GUI_weightLog.csv", 'r') as csvfile:
+        records = csv.reader(csvfile, delimiter=',')
+        for row in records:  # grabs data from CSV and puts into k,v in dict
+            d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # strs to datetime and float weights
+
+    sorted_dates = sorted(d)  # returns an interable so prefer list comprehensions
+    x = [ k for k in sorted_dates ]  # datetime objs sorted so that line graph connects in order
+    y = [ d[k] for k in sorted_dates ]
+
+    return x, y
 
 """Handles submit button clicks by appropriately modifying CSV file
 """
@@ -16,8 +33,8 @@ def submit_handler(d, w):
     # deletes an existing record
     # makes more sense when you bind keypress event
     if weight == "":
-         delete_record(date_recorded)
-         return "grey" # user will not see change but View code needs return color str
+        delete_record(date_recorded)
+        return "grey"  # user will not see change but View code needs return color str
 
     try:  # validates weight input
         float(weight)
@@ -35,6 +52,8 @@ def submit_handler(d, w):
 
 """Deletes a record from the csv
 """
+
+
 def delete_record(del_this_date):
     log = []
     filename = "GUI_weightLog.csv"
@@ -54,6 +73,8 @@ def delete_record(del_this_date):
 Used to populate entry box
 And also to handle new submissions
 """
+
+
 def lookup_record(date_str):
     # handles file not found case
     try:
@@ -76,6 +97,8 @@ def lookup_record(date_str):
 """Replaces weight value for existing record
 and overwrites the csv
 """
+
+
 def replace_value(date, new_weight):
     log = []
     filename = "GUI_weightLog.csv"
