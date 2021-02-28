@@ -23,3 +23,8 @@ Also different view modes such as weekly or all-time
 Please advise on button handler where you pass references to the button, the window, etc
 Seems brittle
 And it seems like there's a more robust way to handle events with def def and event binding
+
+
+TODO documentation
+TODO hierarchy
+TODO comprehension review
