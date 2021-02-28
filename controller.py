@@ -50,8 +50,6 @@ def submit_handler(d, w):
 
 """Deletes a record from the csv
 """
-
-
 def delete_record(del_this_date):
     log = []
     filename = "GUI_weightLog.csv"
@@ -71,8 +69,6 @@ def delete_record(del_this_date):
 Used to populate entry box
 And also to handle new submissions
 """
-
-
 def lookup_record(date_str):
     # handles file not found case
     try:
@@ -95,8 +91,6 @@ def lookup_record(date_str):
 """Replaces weight value for existing record
 and overwrites the csv
 """
-
-
 def replace_value(date, new_weight):
     log = []
     filename = "GUI_weightLog.csv"

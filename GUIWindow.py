@@ -17,6 +17,7 @@ import matplotlib.ticker as ticker
 import controller as ct
 from matplotlib.dates import DateFormatter
 
+
 # from functools import partial
 # import logger as lg
 # import csv
@@ -35,27 +36,77 @@ class App(tk.Tk):
         self.l1 = tk.Label(self, text="Date", font=("Arial", 25)).grid(row=0)
         self.l2 = tk.Label(self, text="Weight (lbs)", font=("Arial", 25)).grid(row=1)
 
-        self.cal = DateEntry(self, year=2021, font=("Arial", 20))  # returns a str (M/D/YY)
+        self.cal = DateEntry(self, font=("Arial", 20))  # returns a str (M/D/YY)
         self.cal.grid(row=0, column=1, padx=30, pady=10, ipady=10)
+        self.cal.bind("<<DateEntrySelected>>", self.fill_next)  # binds date selected to fill entry with record
 
         self.e_w = tk.Entry(self, font=("Arial", 20))
         self.e_w.grid(row=1, column=1, padx=30, pady=10, ipady=10)
+        # on startup, autofill today's date and weight
+        self.auto_fill()
+        # bind keypress events for intuitive data entry
+        self.e_w.bind("<Key>", self.handle_keypress)
 
         button_style = font.Font(family="Arial", size=25, weight='bold')
         self.quit_btn = tk.Button(self, text="Quit", font=button_style, command=self.quit)
         self.quit_btn.grid(row=3, column=0, sticky=tk.W, pady=10, padx=100)
         self.submit_btn = tk.Button(self, text="Submit", font=button_style, command=self.submit_handler)
         self.submit_btn.grid(row=3, column=1, sticky=tk.W, pady=10, padx=100)
-        self.plot_btn = tk.Button(self, text="Plot", font=button_style, command=self.update_graph)
+
+        # user is likely to write a new value in the entry and hit plot
+        # clicking plot button should update the log and redraw the graph
+        # combine funcs and bind to plot button
+        self.plot_btn = tk.Button(self, text="Plot", font=button_style,
+                                  command=self.combine_funcs(self.submit_handler, self.update_graph))
         self.plot_btn.grid(row=4, column=1, sticky=tk.W, pady=10, padx=100)
+
+
         self.report_btn = tk.Button(self, text='Send Report', font=button_style, command=self.send_report)
         self.report_btn.grid(row=4, column=0, sticky=tk.W, pady=10, padx=100)
 
         # embed empty plot for startup view
+        self.initialize_graph()
+
+
+    def combine_funcs(self, *funcs):
+        def inner_combined_func(*args, **kwargs):
+            for f in funcs:
+                f(*args, **kwargs)
+
+        # returning the reference of inner_combined_func
+        # this reference will have the called result of all
+        # the functions that are passed to the combined_funcs
+        return inner_combined_func
+
+    def func1(self):
+        print("function 1")
+
+    def func2(self):
+        print("function 2")
+
+    def handle_keypress(self, e):
+        if e.char == '\r':  # log new weight when user hits <Enter>
+            self.e_w.config(fg='grey')
+            self.submit_handler()
+        else:  # switch font back to black to indicate active editing
+            self.e_w.config(fg='black')  # when entry is changed, change text back to black
+
+    def initialize_graph(self):
         self.set_up_graph();
-        self.plt.xaxis.set_major_locator(ticker.NullLocator())  # turn off x, y labels and ticks
-        self.plt.yaxis.set_major_locator(ticker.NullLocator())  # cleaner startup view
+        self.plt.xaxis.set_major_locator(ticker.NullLocator())  # turns off x, y labels and ticks
+        self.plt.yaxis.set_major_locator(ticker.NullLocator())  # for cleaner startup view
         self.plt.set_title("Weight Change over Time")
+
+    def auto_fill(self):  # general method to fill entry
+        self.e_w.config(fg='black')
+        lookup_date = self.cal.get_date().strftime('%b-%d-%Y')
+        text = ct.lookup_record(lookup_date)
+        self.e_w.delete(0, "end")
+        if text != None:  # a valid record may be empty str but not null
+            self.e_w.insert(0, text)
+
+    def fill_next(self, e):  # wraps auto_fill so that for binding
+        self.auto_fill()
 
     def set_up_graph(self):
         self.figure = Figure(figsize=(9, 8), dpi=100)
@@ -64,9 +115,7 @@ class App(tk.Tk):
         self.canvas.get_tk_widget().grid(row=0, column=2, rowspan=15, padx=5, pady=5)
         self.plt.set_title("Weight Change over Time")
 
-
     def update_graph(self):
-
         self.set_up_graph()
         # since no more lazy loading of data entry
         # actually CSV file is always kept up to date
@@ -85,12 +134,10 @@ class App(tk.Tk):
         img = self.plt.get_figure()
         img.savefig("weightlog.png")
 
-
     def submit_handler(self):
         date_sel = self.cal.get_date().strftime('%b-%d-%Y')
         weight_ent = self.e_w.get()
         self.e_w.config(fg=ct.submit_handler(date_sel, weight_ent))  # grey out text when new value submitted
-
 
     def send_report(self):
         ct.email_report()
