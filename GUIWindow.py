@@ -3,7 +3,7 @@
 @author fayefong
 
 Next step is to clean up inefficient code and document properly
-
+Proper class design and package hierarchy
 ---
 
 Please advise on button handler where you pass references to the button, the window, etc
@@ -159,6 +159,10 @@ def update_graph():
     plt.xaxis.set_major_formatter(DateFormatter('%b-%d-%Y'))
     plt.tick_params(axis='x', labelrotation=25)
 
+    # save graph as png
+    img = plt.get_figure()
+    img.savefig("weightlog.png")
+
 # def setTextInput(e_w, text):
 #     e_w.delete(0, "end")
 #     e_w.insert(0, text)
@@ -171,6 +175,11 @@ def lookup_record(date_str):
             return row[1]
     # when no record is found matching date requested return empty str
     # return ""  # handles empty file case and missing record
+
+def send_report():
+    lg.email_report("Y")
+
+
 if __name__ == '__main__':
 
     # replace_value("Feb-26-2021", "99")
@@ -246,6 +255,16 @@ if __name__ == '__main__':
                                          pady=10,
                                          padx=100)
 
+    # report button to email png to Neil
+    tk.Button(master,
+              text='Send Report',
+              font=button_style,
+              command=send_report).grid(row=4,
+                                         column=0,
+                                         sticky=tk.W,
+                                         pady=10,
+                                         padx=100)
+
     # embed a blank plot
     figure = Figure(figsize=(9, 8), dpi=100)
     plt = figure.add_subplot(1, 1, 1)
@@ -256,5 +275,6 @@ if __name__ == '__main__':
     # plt.set_xlabel('Date')
     # plt.set_ylabel('Weight (lbs)')
     plt.set_title("Weight Change over Time")
+
 
     master.mainloop()

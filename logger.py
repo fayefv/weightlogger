@@ -88,8 +88,10 @@ def show_log(filename):
 
 
 def email_report(reporter):
+
     if reporter.upper() == 'Y':
-        receiver = "theinimitableneil@gmail.com"
+        # receiver = "theinimitableneil@gmail.com"
+        receiver = "fong.faye@gmail.com"
         body = "This message was generated automatically to" \
                " send you an updated report on Faye's weight loss journey. " \
                "Please see attached."
