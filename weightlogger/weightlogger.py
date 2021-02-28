@@ -10,7 +10,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.ticker as ticker
 import controller as ct
 from matplotlib.dates import DateFormatter
-
+import constant as const
 
 class App(tk.Tk):
     def __init__(self):  # widgets are attributes of the class
@@ -43,15 +43,19 @@ class App(tk.Tk):
         # clicking plot button should update the log and redraw the graph
         # combine funcs and bind to plot button
         self.plot_btn = tk.Button(self, text="Plot", font=button_style,
-                                  command=self.combine_funcs(self.submit_handler, self.update_graph))
+                                  command=self.combine_funcs(self.submit_handler, self.show_graph))
         self.plot_btn.grid(row=4, column=1, pady=10, padx=30, sticky=tk.W, ipadx=75, ipady=10)
-
-        # user statistics printout
 
 
 
         # embed empty plot for startup view
         self.initialize_graph()
+
+        '''May add user statistics report to Report function
+            Average weight
+            Variance
+            Rate of weight loss over last week
+        '''
 
     def combine_funcs(self, *funcs):
         def inner_combined_func(*args, **kwargs):
@@ -67,6 +71,7 @@ class App(tk.Tk):
         if e.char == '\r':  # log new weight when user hits <Enter>
             self.e_w.config(fg='grey')
             self.submit_handler()
+            self.show_graph()
         else:  # switch font back to black to indicate active editing
             self.e_w.config(fg='black')  # when entry is changed, change text back to black
 
@@ -94,7 +99,10 @@ class App(tk.Tk):
         self.canvas.get_tk_widget().grid(row=0, column=2, rowspan=15, columnspan=10, padx=5, pady=5)
         self.plt.set_title("Weight Change over Time")
 
-    def update_graph(self):
+    '''Desire to add additional view modes for all-time, just last week, or any duration
+        Requires investigation for xrange of plotter
+    '''
+    def show_graph(self):
         self.set_up_graph()
         # since no more lazy loading of data entry
         # actually CSV file is always kept up to date
@@ -111,7 +119,7 @@ class App(tk.Tk):
 
         # save graph as png
         img = self.plt.get_figure()
-        img.savefig("weightlog.png")
+        img.savefig(const.OUTPUTFILENAME)
 
     def submit_handler(self):
         date_sel = self.cal.get_date().strftime('%b-%d-%Y')

@@ -6,6 +6,7 @@ import tkinter as tk
 import csv
 import os
 from datetime import datetime
+import constant as const
 
 
 """Collects k,v data from current csv file, 
@@ -13,7 +14,7 @@ converts to sorted list of datetime objects
 """
 def get_records():
     d = {}
-    with open("GUI_weightLog.csv", 'r') as csvfile:
+    with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
         for row in records:  # grabs data from CSV and puts into k,v in dict
             d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # strs to datetime and float weights
@@ -52,16 +53,14 @@ def submit_handler(d, w):
 """
 def delete_record(del_this_date):
     log = []
-    filename = "GUI_weightLog.csv"
-    fields = ["date", "weight in lbs"]
-    with open(filename, 'r') as csvfile:
+    with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
         for row in records:
             if row[0] != del_this_date:  # collect every row except the deletion date
                 log.append({"date": row[0], "weight in lbs": row[1]})
 
-    with open(filename, 'w', newline="") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fields)
+    with open(const.LOGFILENAME, 'w', newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerows(log)
 
 
@@ -72,13 +71,13 @@ And also to handle new submissions
 def lookup_record(date_str):
     # handles file not found case
     try:
-        csv_file = csv.reader(open("GUI_weightLog.csv", 'r'), delimiter=',')
+        csv_file = csv.reader(open(const.LOGFILENAME, 'r'), delimiter=',')
     except FileNotFoundError:
-        with open("GUI_weightLog.csv", 'w') as csv_file:
+        with open(const.LOGFILENAME, 'w') as csv_file:
             return ""
 
     # handles empty file case
-    if os.stat("GUI_weightLog.csv").st_size == 0:
+    if os.stat(const.LOGFILENAME).st_size == 0:
         return ""
 
     for row in csv_file:
@@ -93,10 +92,7 @@ and overwrites the csv
 """
 def replace_value(date, new_weight):
     log = []
-    filename = "GUI_weightLog.csv"
-    fields = ["date", "weight in lbs"]
-
-    with open(filename, 'r') as csvfile:
+    with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
         for row in records:
             d, w = row[0], row[1]
@@ -104,16 +100,14 @@ def replace_value(date, new_weight):
                 w = new_weight
             log.append({"date": d, "weight in lbs": w})
 
-    with open(filename, 'w', newline="") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fields)
+    with open(const.LOGFILENAME, 'w', newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerows(log)
 
 
 def write_new_data(d, w):
-    filename = "GUI_weightLog.csv"
-    fields = ["date", "weight in lbs"]
-    with open(filename, 'a+', newline="") as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fields)
+    with open(const.LOGFILENAME, 'a+', newline="") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerow({"date": d, "weight in lbs": w})
 
 
@@ -122,7 +116,7 @@ def email_report():
     body = "This message was generated automatically to" \
            " send you an updated report on Faye's weight loss journey. " \
            "Please see attached."
-    filename = "weightlog.png"
+    filename = const.OUTPUTFILENAME
 
     # send email attachment of png figure
     yag = yagmail.SMTP("faye.vainsencher@gmail.com")
