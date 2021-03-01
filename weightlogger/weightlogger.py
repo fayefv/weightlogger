@@ -13,24 +13,34 @@ from matplotlib.dates import DateFormatter
 import constant as const
 from datetime import datetime, timedelta
 from functools import partial
-from enum import Enum
 
-
-class ViewMode(Enum):
-    ALL_TIME = 1
-    WEEK = 2
+from controller import ViewMode
 
 
 class App(tk.Tk):
     def __init__(self):  # widgets are attributes of the class
         super().__init__()
+        # static labels
         self.l1 = tk.Label(self, text="Date", font=("Arial", 25)).grid(row=0, column=0, sticky=tk.E)
         self.l2 = tk.Label(self, text="Weight (lbs)", font=("Arial", 25)).grid(row=1, column=0, sticky=tk.E)
+        self.trend = tk.Label(self, text="Trends", font=("Arial", 25)).grid(row=5, column=0)
+        self.l3 = tk.Label(self, text = "Overall: ", font=("Arial", 25)).grid(row=6, column=0, sticky=tk.E)
+        self.l4 = tk.Label(self, text = "Last Week: ", font=("Arial", 25)).grid(row=7, column=0, sticky=tk.E)
 
+        # trend report
+        self.all_trend = tk.Label(self, text=self.get_trend(ViewMode.ALL_TIME),
+                                  font=("Arial", 25))
+        self.all_trend.grid(row=6, column=1, columnspan=1)
+        self.week_trend = tk.Label(self, text=self.get_trend(ViewMode.WEEK),
+                                   font=("Arial", 25))
+        self.week_trend.grid(row=7, column=1, columnspan=1)
+
+        # calendar drop down menu
         self.cal = DateEntry(self, font=("Arial", 20), width=8)  # returns a str (M/D/YY)
         self.cal.grid(row=0, column=1, padx=30, pady=10, ipady=10, sticky=tk.W)
         self.cal.bind("<<DateEntrySelected>>", self.fill_next)  # binds date selected to fill entry with record
 
+        # weight entry
         self.e_w = tk.Entry(self, font=("Arial", 20), width=8)
         self.e_w.grid(row=1, column=1, padx=30, pady=10, ipady=10, sticky=tk.W)
         # on startup, autofill today's date and weight
@@ -38,6 +48,7 @@ class App(tk.Tk):
         # bind keypress events for intuitive data entry
         self.e_w.bind("<Key>", self.handle_keypress)
 
+        # actions that do not modify log
         button_style = font.Font(family="Arial", size=25, weight='bold')
         self.quit_btn = tk.Button(self, text="Quit", font=button_style, command=self.quit)
         self.quit_btn.grid(row=2, column=0, pady=10, padx=50, ipadx=20, ipady=10)
@@ -45,12 +56,12 @@ class App(tk.Tk):
         self.report_btn = tk.Button(self, text='Report', font=button_style, command=self.send_report)
         self.report_btn.grid(row=3, column=0, pady=10, padx=50, ipady=10)
 
+        # actions that modify log
         self.submit_btn = tk.Button(self, text="Submit", font=button_style, command=self.submit_handler)
         self.submit_btn.grid(row=2, column=1, pady=10, padx=30, sticky=tk.W, ipadx=50, ipady=10)
 
-
         # keep track of VIEWMODE
-        self.mode = ViewMode.ALL_TIME # set startup default to ALL_TIME
+        self.mode = ViewMode.ALL_TIME  # set startup default to ALL_TIME
 
         # user is likely to write a new value in the entry and hit plot
         # clicking plot button should update the log and redraw the graph
@@ -59,51 +70,84 @@ class App(tk.Tk):
         self.plot_btn.grid(row=3, column=1, pady=10, padx=30, sticky=tk.W, ipadx=75, ipady=10)
 
         # user can switch between all-time view or last week
-        self.all_view_btn = tk.Button(self, text="All-Time", font=button_style,
-                                      command=self.show_graph)
+        self.all_view_btn = tk.Button(self, text="All-Time", font=button_style)
+        self.all_view_btn.config(fg='gray', bg='darkgray',
+                                 activebackground='darkgray',
+                                 activeforeground='gray')  # set startup default appearance to ALL-TIME
         self.all_view_btn.grid(row=16, column=6, pady=10, padx=0, sticky=tk.E, ipady=10)
-        self.all_view_btn.bind("<Button-1>", self.toggle_view)
+        self.all_view_btn.bind("<Button-1>", self.view_handler)
 
+        self.wk_view_btn = tk.Button(self, text="Week", font=button_style)
 
-
-        self.wk_view_btn = tk.Button(self, text="Week", font=button_style,
-                                     command=self.show_graph)
         self.wk_view_btn.grid(row=16, column=7, pady=10, padx=0, sticky=tk.W, ipady=10)
-        self.wk_view_btn.bind("<Button-1>", self.toggle_view)
-        # embed empty plot for startup view
+        self.wk_view_btn.bind("<Button-1>", self.view_handler)
+
+        # embed an empty plot on startup
         self.initialize_graph()
 
-        '''May add user statistics report to Report function
-            Average weight
-            Variance
-            Rate of weight loss over last week
+        '''May change symbols from unicode to embedded images to make more robust against encoding differences
+        however, these are pretty standard unicode characters with UTF-8 encoding, so it might be OK
+        
+        Embedded symbols also useful so that you can have custom character
         '''
+
+    # need to bind trend reporting to all updates to CSV (Plot, Enter, Submit)
+    def get_trend(self, range):
+        today = datetime.today()
+        delta = timedelta(weeks=1)
+        lastweek = today - delta
+
+        if range == ViewMode.ALL_TIME:
+            val = ct.calc_trend()
+        elif range == ViewMode.WEEK:
+            val = ct.calc_trend(start=lastweek, end=today)
+
+        def set_symbol():
+            return
+
+        if (val < 0):
+            symbol = u'\u25BC'
+        elif (val == 0):
+            symbol = u'\u25A1'
+        else:  # weight gain
+            symbol = u'\u25B2'
+
+        return f'{symbol} {val:+.1f}'
+
+    def update_trend(self):
+        self.all_trend.config(text=self.get_trend(ViewMode.ALL_TIME))
+        self.week_trend.config(text=self.get_trend(ViewMode.WEEK))
+
+
+    def view_handler(self, e):
+        self.toggle_view(e)
+        self.show_graph()
 
     """Toggles button view appearance but would benefit from actually changing the mode
     """
+
     def toggle_view(self, e):
         if e.widget.cget("text") == "All-Time":
-             # sets the view mode
-             self.mode = ViewMode.ALL_TIME
-             # deactivate mouse over highlight
-             # toggle button click
-             self.all_view_btn.config(fg='gray', bg='darkgray',
-                                      activebackground='darkgray',
-                                      activeforeground='gray')
-             self.wk_view_btn.config(fg='black', bg='lightgray',
-                                     activebackground='lightgray',
-                                     activeforeground='black')
+            # sets the view mode
+            self.mode = ViewMode.ALL_TIME
+            # deactivate mouse over highlight
+            # toggle button click
+            self.all_view_btn.config(fg='gray', bg='darkgray',
+                                     activebackground='darkgray',
+                                     activeforeground='gray')
+            self.wk_view_btn.config(fg='black', bg='lightgray',
+                                    activebackground='lightgray',
+                                    activeforeground='black')
 
         elif e.widget.cget("text") == "Week":
 
             self.mode = ViewMode.WEEK
             self.wk_view_btn.config(fg='gray', bg='darkgray',
-                                     activebackground='darkgray',
-                                      activeforeground='gray')
+                                    activebackground='darkgray',
+                                    activeforeground='gray')
             self.all_view_btn.config(fg='black', bg='lightgray',
-                                      activebackground='lightgray',
+                                     activebackground='lightgray',
                                      activeforeground='black')
-
 
     def combine_funcs(self, *funcs):
         def inner_combined_func(*args, **kwargs):
@@ -147,16 +191,6 @@ class App(tk.Tk):
         self.canvas.get_tk_widget().grid(row=0, column=2, rowspan=15, columnspan=10, padx=5, pady=5)
         self.plt.set_title("Weight Change over Time")
 
-    '''Desire to add additional view modes for all-time, just last week, or any duration
-        Requires investigation for xrange of plotter
-    '''
-
-    '''Redesign; view mode buttons toggle the STATE
-        PLOT --> show_graph() acts on the STATE
-        
-        view mode buttons happen to be bound to show_graph() as well
-    '''
-
     def show_graph(self):
         self.set_up_graph()
         today = datetime.today()
@@ -184,6 +218,7 @@ class App(tk.Tk):
         date_sel = self.cal.get_date().strftime('%b-%d-%Y')
         weight_ent = self.e_w.get()
         self.e_w.config(fg=ct.submit_handler(date_sel, weight_ent))  # grey out text when new value submitted
+        self.update_trend()
 
     def send_report(self):
         ct.email_report()

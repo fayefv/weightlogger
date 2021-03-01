@@ -7,12 +7,32 @@ import csv
 import os
 from datetime import datetime
 import constant as const
+from enum import Enum
+from datetime import datetime, timedelta
+
+class ViewMode(Enum):
+    ALL_TIME = 1
+    WEEK = 2
+
+
+
+
+"""Calculates useful statistics
+This method may be expanded for more sophisticated trend statistics
+"""
+
+
+def calc_trend(**kwargs):
+    x, y = get_records(**kwargs)
+    return y[len(y) - 1] - y[0]
 
 
 """Collects k,v data from current csv file, 
 converts to sorted list of datetime objects
 Optional kwargs allows you to select timerange
 """
+
+
 def get_records(**kwargs):
     d = {}
     with open(const.LOGFILENAME, 'r') as csvfile:
@@ -24,13 +44,16 @@ def get_records(**kwargs):
     if len(kwargs) > 0:  # select dates within specified timerange
         time_st = kwargs['start']
         time_end = kwargs['end']
-        sorted_dates = [ d for d in sorted_dates if d >= time_st and d <= time_end ]
-    sorted_weights = [ d[k] for k in sorted_dates ]
+        sorted_dates = [d for d in sorted_dates if d >= time_st and d <= time_end]
+    sorted_weights = [d[k] for k in sorted_dates]
 
     return sorted_dates, sorted_weights
 
+
 """Handles submit button clicks by appropriately modifying CSV file
 """
+
+
 def submit_handler(d, w):
     date_recorded = d
     weight = w
@@ -57,6 +80,8 @@ def submit_handler(d, w):
 
 """Deletes a record from the csv
 """
+
+
 def delete_record(del_this_date):
     log = []
     with open(const.LOGFILENAME, 'r') as csvfile:
@@ -74,6 +99,8 @@ def delete_record(del_this_date):
 Used to populate entry box
 And also to handle new submissions
 """
+
+
 def lookup_record(date_str):
     # handles file not found case
     try:
@@ -96,6 +123,8 @@ def lookup_record(date_str):
 """Replaces weight value for existing record
 and overwrites the csv
 """
+
+
 def replace_value(date, new_weight):
     log = []
     with open(const.LOGFILENAME, 'r') as csvfile:
