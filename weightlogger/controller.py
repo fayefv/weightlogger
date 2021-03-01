@@ -11,8 +11,9 @@ import constant as const
 
 """Collects k,v data from current csv file, 
 converts to sorted list of datetime objects
+Optional kwargs allows you to select timerange
 """
-def get_records():
+def get_records(**kwargs):
     d = {}
     with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
@@ -20,7 +21,12 @@ def get_records():
             d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # strs to datetime and float weights
 
     sorted_dates = sorted(d)  # returns sorted list of keys
+    if len(kwargs) > 0:  # select dates within specified timerange
+        time_st = kwargs['start']
+        time_end = kwargs['end']
+        sorted_dates = [ d for d in sorted_dates if d >= time_st and d <= time_end ]
     sorted_weights = [ d[k] for k in sorted_dates ]
+
     return sorted_dates, sorted_weights
 
 """Handles submit button clicks by appropriately modifying CSV file
