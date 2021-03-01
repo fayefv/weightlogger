@@ -80,7 +80,7 @@ class App(tk.Tk):
         self.plt.set_title("Weight Change over Time")
 
     def auto_fill(self):  # general method to fill entry
-        self.e_w.config(fg='black')
+        self.e_w.config(fg='gray')
         lookup_date = self.cal.get_date().strftime('%b-%d-%Y')
         text = ct.lookup_record(lookup_date)
         self.e_w.delete(0, "end")
@@ -102,8 +102,6 @@ class App(tk.Tk):
     '''
     def show_graph(self):
         self.set_up_graph()
-        # since no more lazy loading of data entry
-        # actually CSV file is always kept up to date
         x, y = ct.get_records()
 
         self.plt.plot(x, y, color='lightgray', marker='o', markerfacecolor='black')
