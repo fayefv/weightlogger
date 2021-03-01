@@ -1,4 +1,4 @@
-"""A GUI version of WeightLogger application.
+"""A simple WeightLogger application to track personal fitness.
 
 @author fayefong
 """
@@ -45,8 +45,6 @@ class App(tk.Tk):
         self.plot_btn = tk.Button(self, text="Plot", font=button_style,
                                   command=self.combine_funcs(self.submit_handler, self.show_graph))
         self.plot_btn.grid(row=4, column=1, pady=10, padx=30, sticky=tk.W, ipadx=75, ipady=10)
-
-
 
         # embed empty plot for startup view
         self.initialize_graph()

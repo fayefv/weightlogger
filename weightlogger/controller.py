@@ -1,4 +1,4 @@
-"""Defines the controller functions for WeightLogger App
+"""Defines the controller functions for weightlogger app
 @author fayefong
 """
 import yagmail
