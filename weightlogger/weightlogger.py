@@ -20,6 +20,11 @@ from PIL import Image, ImageTk
 class App(tk.Tk):
     def __init__(self):  # widgets are attributes of the class
         super().__init__()
+
+        self.today = datetime.today()
+        delta = timedelta(weeks=1)
+        self.lastweek = self.today - delta
+
         # static labels
         self.l1 = tk.Label(self, text="Date", font=("Arial", 25)).grid(row=0, column=0, sticky=tk.E)
         self.l2 = tk.Label(self, text="Weight (lbs)", font=("Arial", 25)).grid(row=1, column=0, sticky=tk.E)
@@ -34,17 +39,17 @@ class App(tk.Tk):
         load1 = Image.open("images/redarrow.png")
         load2 = Image.open("images/greenarrow.png")
         # resize images to fit
-        resize1 = load1.resize((30,30), Image.ANTIALIAS)
-        resize2 = load2.resize((30,30), Image.ANTIALIAS)
+        resize1 = load1.resize((30, 30), Image.ANTIALIAS)
+        resize2 = load2.resize((30, 30), Image.ANTIALIAS)
         self.red_arr_img = ImageTk.PhotoImage(resize1)
         self.green_arr_img = ImageTk.PhotoImage(resize2)
 
         # make report widgets
         self.all_icon = tk.Label(self.r_frame)
         self.week_icon = tk.Label(self.r_frame)
-        self.all_trend = tk.Label(self.r_frame, text=self.get_trend(ViewMode.ALL_TIME),
+        self.all_trend = tk.Label(self.r_frame, text=self.set_trend(ViewMode.ALL_TIME),
                                   font=("Arial", 25))
-        self.week_trend = tk.Label(self.r_frame, text=self.get_trend(ViewMode.WEEK),
+        self.week_trend = tk.Label(self.r_frame, text=self.set_trend(ViewMode.WEEK),
                                    font=("Arial", 25))
         self.l3 = tk.Label(self.r_frame, text="Overall: ", font=("Arial", 25))
         self.l4 = tk.Label(self.r_frame, text="Last Week: ", font=("Arial", 25))
@@ -121,54 +126,40 @@ class App(tk.Tk):
         '''
 
     # need to bind trend reporting to all updates to CSV (Plot, Enter, Submit)
-    def get_trend(self, range):
-        today = datetime.today()
-        delta = timedelta(weeks=1)
-        lastweek = today - delta
+    def set_trend(self, range):
+
+        green_icon = self.green_arr_img
+        red_icon = self.red_arr_img
 
         if range == ViewMode.ALL_TIME:
             val = ct.calc_trend()
-            if (val < 0):  # weight loss
-                # print("all time weight loss")
-                self.all_icon.config(image=self.green_arr_img)
-                self.all_icon.image=self.green_arr_img
-            elif (val > 0):  # weight gain
-                # print("weight gain")
-                self.all_icon.config(image=self.red_arr_img)
-                self.all_icon.image=self.red_arr_img
-            else:
-                self.all_icon.config(image="")
+
+            # sets the corresponding icon
+            self.all_icon.config(image=green_icon if val < 0 else red_icon if val > 0 else "")
+            self.all_icon.image = self.green_arr_img if val < 0 else self.red_arr_img if val > 0 else ""
+
         elif range == ViewMode.WEEK:
-            val = ct.calc_trend(start=lastweek, end=today)
-            if (val < 0):  # weight loss
-                # print("weekly weight loss")
-                self.week_icon.config(image=self.green_arr_img)
-                self.week_icon.image=self.green_arr_img
-            elif (val > 0): # weight gain
-                # print("weight gain")
-                self.week_icon.config(image=self.red_arr_img)
-                self.week_icon.image=self.red_arr_img
-            else:
-                self.week_icon.config(image="")
+            val = ct.calc_trend(start=self.lastweek, end=self.today)
+
+            # sets the corresponding icon
+            self.week_icon.config(image=green_icon if val < 0 else red_icon if val > 0 else "")
+            self.week_icon.image = self.green_arr_img if val < 0 else self.red_arr_img if val > 0 else ""
 
         return f'{val:+.1f}'
 
     def update_trend(self):
-        self.all_trend.config(text=self.get_trend(ViewMode.ALL_TIME))
-        self.week_trend.config(text=self.get_trend(ViewMode.WEEK))
+        self.all_trend.config(text=self.set_trend(ViewMode.ALL_TIME))
+        self.week_trend.config(text=self.set_trend(ViewMode.WEEK))
 
     def view_handler(self, e):
         self.toggle_view(e)
         self.show_graph()
 
-    """Toggles button view appearance but would benefit from actually changing the mode
-    """
-
     def toggle_view(self, e):
         if e.widget.cget("text") == "All-Time":
             # sets the view mode
             self.mode = ViewMode.ALL_TIME
-            # deactivate mouse over highlight
+            # deactivated mouse over highlight
             # toggle button click
             self.all_view_btn.config(fg='gray', bg='darkgray',
                                      activebackground='darkgray',
@@ -188,16 +179,35 @@ class App(tk.Tk):
                                      activeforeground='black')
 
     def combine_funcs(self, *funcs):
+        """Utility wrapper function to allow binding two functions to button click
+
+        Args:
+            *funcs:
+
+        Returns: the reference of inner_combined_func
+                which will have the called result of all
+                the functions that are passed to the combined_funcs
+
+        """
         def inner_combined_func(*args, **kwargs):
             for f in funcs:
                 f(*args, **kwargs)
 
-        # returning the reference of inner_combined_func
-        # this reference will have the called result of all
-        # the functions that are passed to the combined_funcs
+        # returning
         return inner_combined_func
 
     def handle_keypress(self, e):
+        """Binds <Enter> keypress to updating the log and the plot, then greys out
+        the entry to indicate that the weight has been logged.
+            All other keypresses are the user modifying the current record, so the font
+            is returned to black to indicate active editing.
+
+        Args:
+            e: <KeyPress>
+
+        Returns:
+
+        """
         if e.char == '\r':  # log new weight when user hits <Enter>
             self.e_w.config(fg='grey')
             self.submit_handler()
@@ -205,13 +215,12 @@ class App(tk.Tk):
         else:  # switch font back to black to indicate active editing
             self.e_w.config(fg='black')  # when entry is changed, change text back to black
 
-    def initialize_graph(self):
-        self.set_up_graph();
-        self.plt.xaxis.set_major_locator(ticker.NullLocator())  # turns off x, y labels and ticks
-        self.plt.yaxis.set_major_locator(ticker.NullLocator())  # for cleaner startup view
-        self.plt.set_title("Weight Change over Time")
+    def auto_fill(self):
+        """Fills the entry box with weight corresponding to selected date.
 
-    def auto_fill(self):  # general method to fill entry
+        Returns:
+
+        """
         self.e_w.config(fg='gray')
         lookup_date = self.cal.get_date().strftime('%b-%d-%Y')
         text = ct.lookup_record(lookup_date)
@@ -219,26 +228,52 @@ class App(tk.Tk):
         if text != None:  # a valid record may be empty str but not null
             self.e_w.insert(0, text)
 
-    def fill_next(self, e):  # wraps auto_fill so that for binding
+    def fill_next(self, e):
+        """Wrapper for auto_fill that accepts event arg and so may be bound to DateEntry
+        selection event.
+        """
         self.auto_fill()
 
+    def initialize_graph(self):
+        """Initializes startup view with an empty plot.
+
+        Returns:
+
+        """
+        self.set_up_graph();
+        self.plt.xaxis.set_major_locator(ticker.NullLocator())  # turns off x, y labels and ticks
+        self.plt.yaxis.set_major_locator(ticker.NullLocator())  # for cleaner startup view
+        self.plt.set_title("Weight Change over Time")
+
     def set_up_graph(self):
+        """Boiler plate to set up a new embedded plot.
+
+        Returns:
+
+        """
         self.figure = Figure(figsize=(9, 8), dpi=100)
         self.plt = self.figure.add_subplot(1, 1, 1)
         self.canvas = FigureCanvasTkAgg(self.figure, self)
-        self.canvas.get_tk_widget().grid(row=0, column=2, rowspan=15, columnspan=10, padx=5, pady=5)
+        self.canvas.get_tk_widget().grid(row=0, column=2, rowspan=15,
+                                         columnspan=10, padx=5, pady=5)
         self.plt.set_title("Weight Change over Time")
 
     def show_graph(self):
+        """Plots data in a specified range.
+
+        Returns:
+
+        """
+        # set up a new embedded plot
         self.set_up_graph()
-        today = datetime.today()
-        delta = timedelta(weeks=1)
-        lastweek = today - delta
+
+        # get data from desired date range
         if self.mode == ViewMode.WEEK:
-            x, y = ct.get_records(start=lastweek, end=today)
+            x, y = ct.get_records(start=self.lastweek, end=self.today)
         elif self.mode == ViewMode.ALL_TIME:
             x, y = ct.get_records()
 
+        # plot data and format graph
         self.plt.plot(x, y, color='lightgray', marker='o', markerfacecolor='black')
         self.plt.set_xlabel('Date')
         self.plt.set_ylabel('Weight (lbs)')
@@ -253,12 +288,22 @@ class App(tk.Tk):
         img.savefig(const.OUTPUTFILENAME)
 
     def submit_handler(self):
+        """Adds/deletes/modifies weight records for a specified date.
+
+        Returns:
+
+        """
         date_sel = self.cal.get_date().strftime('%b-%d-%Y')
         weight_ent = self.e_w.get()
-        self.e_w.config(fg=ct.submit_handler(date_sel, weight_ent))  # grey out text when new value submitted
-        self.update_trend()
+        self.e_w.config(fg=ct.submit_handler(date_sel, weight_ent))  # greys out text after new value submitted
+        self.update_trend()  # recalculates statistics report based on new data
 
     def send_report(self):
+        """Emails png of current plot to recipients.
+
+        Returns:
+
+        """
         ct.email_report()
 
 
