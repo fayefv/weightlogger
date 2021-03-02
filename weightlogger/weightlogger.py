@@ -29,40 +29,40 @@ class App(tk.Tk):
         self.r_frame = tk.Frame(self)
         self.r_frame.grid(row=6, column=0, rowspan=5, columnspan=2, sticky=tk.N, ipadx=45)
 
+        # create icons
+        # load images
+        load1 = Image.open("misc/redarrow.png")
+        load2 = Image.open("misc/greenarrow.png")
+        # resize images to fit
+        resize1 = load1.resize((30,30), Image.ANTIALIAS)
+        resize2 = load2.resize((30,30), Image.ANTIALIAS)
+        self.red_arr_img = ImageTk.PhotoImage(resize1)
+        self.green_arr_img = ImageTk.PhotoImage(resize2)
+
         # make report widgets
+        self.all_icon = tk.Label(self.r_frame)
+        self.week_icon = tk.Label(self.r_frame)
         self.all_trend = tk.Label(self.r_frame, text=self.get_trend(ViewMode.ALL_TIME),
                                   font=("Arial", 25))
-        self.all_symbol = tk.Label(self.r_frame, text="$", font=("Arial", 25))
         self.week_trend = tk.Label(self.r_frame, text=self.get_trend(ViewMode.WEEK),
                                    font=("Arial", 25))
-        self.week_symbol = tk.Label(self.r_frame, text="@", font=("Arial", 25))
         self.l3 = tk.Label(self.r_frame, text="Overall: ", font=("Arial", 25))
         self.l4 = tk.Label(self.r_frame, text="Last Week: ", font=("Arial", 25))
 
-
-        # image = Image.open('misc/redarrow.png')
-        # image.thumbnail((40,40))
-        # image.save('misc/redarrow_thumbnail.png')
-        #
-        # rs = Image.open('misc/redarrow_thumbnail.png')
-        # # rs.show()
-        #
-        # render = ImageTk.PhotoImage(rs)
-        # self.red_arr_img = tk.Label(self, image=render)
-        # self.red_arr_img.image = render
-
-        img = tk.PhotoImage(file="misc/redarrow.png")
-        self.red_arr_img = tk.Label(self, image=img)
-
+        # finish rendering
+        # image=self.green_arr_img or self.red_arr_img
+        # image=self.green_arr_img or self.red_arr_img
+        # self.all_icon.image= self.green_arr_img or self.red_arr_img
+        # self.week_icon.image= self.green_arr_img or self.red_arr_img
 
         # layout report widgets in report frame
         self.l3.grid(row=0, column=0, sticky=tk.E, padx=10, pady=10)
         self.l4.grid(row=1, column=0, sticky=tk.E, padx=10, pady=10)
-        # self.all_symbol.grid(row=0, column=1, padx=15)
-        self.red_arr_img.grid(row=0, column=1, padx=15)
-        self.week_symbol.grid(row=1, column=1, padx=15)
         self.all_trend.grid(row=0, column=2)
         self.week_trend.grid(row=1, column=2)
+        # layout icons in the report frame
+        self.all_icon.grid(row=0, column=1, padx=15)
+        self.week_icon.grid(row=1, column=1, padx=15)
 
         # calendar drop down menu
         self.cal = DateEntry(self, font=("Arial", 20), width=8)  # returns a str (M/D/YY)
@@ -128,18 +128,28 @@ class App(tk.Tk):
 
         if range == ViewMode.ALL_TIME:
             val = ct.calc_trend()
+            if (val < 0):  # weight loss
+                # print("all time weight loss")
+                self.all_icon.config(image=self.green_arr_img)
+                self.all_icon.image=self.green_arr_img
+            elif (val > 0):  # weight gain
+                # print("weight gain")
+                self.all_icon.config(image=self.red_arr_img)
+                self.all_icon.image=self.red_arr_img
+            else:
+                self.all_icon.config(image="")
         elif range == ViewMode.WEEK:
             val = ct.calc_trend(start=lastweek, end=today)
-
-        def set_symbol():
-            return
-
-        if (val < 0):
-            symbol = u'\u25BC'
-        elif (val == 0):
-            symbol = u'\u25A1'
-        else:  # weight gain
-            symbol = u'\u25B2'
+            if (val < 0):  # weight loss
+                # print("weekly weight loss")
+                self.week_icon.config(image=self.green_arr_img)
+                self.week_icon.image=self.green_arr_img
+            elif (val > 0): # weight gain
+                # print("weight gain")
+                self.week_icon.config(image=self.red_arr_img)
+                self.week_icon.image=self.red_arr_img
+            else:
+                self.week_icon.config(image="")
 
         return f'{val:+.1f}'
 
