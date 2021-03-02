@@ -13,8 +13,8 @@ from matplotlib.dates import DateFormatter
 import constant as const
 from datetime import datetime, timedelta
 from functools import partial
-
 from controller import ViewMode
+from PIL import Image, ImageTk
 
 
 class App(tk.Tk):
@@ -24,16 +24,45 @@ class App(tk.Tk):
         self.l1 = tk.Label(self, text="Date", font=("Arial", 25)).grid(row=0, column=0, sticky=tk.E)
         self.l2 = tk.Label(self, text="Weight (lbs)", font=("Arial", 25)).grid(row=1, column=0, sticky=tk.E)
         self.trend = tk.Label(self, text="Trends", font=("Arial", 25)).grid(row=5, column=0)
-        self.l3 = tk.Label(self, text = "Overall: ", font=("Arial", 25)).grid(row=6, column=0, sticky=tk.E)
-        self.l4 = tk.Label(self, text = "Last Week: ", font=("Arial", 25)).grid(row=7, column=0, sticky=tk.E)
 
-        # trend report
-        self.all_trend = tk.Label(self, text=self.get_trend(ViewMode.ALL_TIME),
+        # trend report frame
+        self.r_frame = tk.Frame(self)
+        self.r_frame.grid(row=6, column=0, rowspan=5, columnspan=2, sticky=tk.N, ipadx=45)
+
+        # make report widgets
+        self.all_trend = tk.Label(self.r_frame, text=self.get_trend(ViewMode.ALL_TIME),
                                   font=("Arial", 25))
-        self.all_trend.grid(row=6, column=1, columnspan=1)
-        self.week_trend = tk.Label(self, text=self.get_trend(ViewMode.WEEK),
+        self.all_symbol = tk.Label(self.r_frame, text="$", font=("Arial", 25))
+        self.week_trend = tk.Label(self.r_frame, text=self.get_trend(ViewMode.WEEK),
                                    font=("Arial", 25))
-        self.week_trend.grid(row=7, column=1, columnspan=1)
+        self.week_symbol = tk.Label(self.r_frame, text="@", font=("Arial", 25))
+        self.l3 = tk.Label(self.r_frame, text="Overall: ", font=("Arial", 25))
+        self.l4 = tk.Label(self.r_frame, text="Last Week: ", font=("Arial", 25))
+
+
+        # image = Image.open('misc/redarrow.png')
+        # image.thumbnail((40,40))
+        # image.save('misc/redarrow_thumbnail.png')
+        #
+        # rs = Image.open('misc/redarrow_thumbnail.png')
+        # # rs.show()
+        #
+        # render = ImageTk.PhotoImage(rs)
+        # self.red_arr_img = tk.Label(self, image=render)
+        # self.red_arr_img.image = render
+
+        img = tk.PhotoImage(file="misc/redarrow.png")
+        self.red_arr_img = tk.Label(self, image=img)
+
+
+        # layout report widgets in report frame
+        self.l3.grid(row=0, column=0, sticky=tk.E, padx=10, pady=10)
+        self.l4.grid(row=1, column=0, sticky=tk.E, padx=10, pady=10)
+        # self.all_symbol.grid(row=0, column=1, padx=15)
+        self.red_arr_img.grid(row=0, column=1, padx=15)
+        self.week_symbol.grid(row=1, column=1, padx=15)
+        self.all_trend.grid(row=0, column=2)
+        self.week_trend.grid(row=1, column=2)
 
         # calendar drop down menu
         self.cal = DateEntry(self, font=("Arial", 20), width=8)  # returns a str (M/D/YY)
@@ -112,12 +141,11 @@ class App(tk.Tk):
         else:  # weight gain
             symbol = u'\u25B2'
 
-        return f'{symbol} {val:+.1f}'
+        return f'{val:+.1f}'
 
     def update_trend(self):
         self.all_trend.config(text=self.get_trend(ViewMode.ALL_TIME))
         self.week_trend.config(text=self.get_trend(ViewMode.WEEK))
-
 
     def view_handler(self, e):
         self.toggle_view(e)
