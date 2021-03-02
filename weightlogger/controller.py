@@ -15,23 +15,17 @@ class ViewMode(Enum):
     WEEK = 2
 
 
-
-
-"""Calculates useful statistics
-This method may be expanded for more sophisticated trend statistics
-"""
-
-
 def calc_trend(**kwargs):
+    """Calculates useful statistics. May be expanded for more sophisticated stats.
+
+    Args:
+        **kwargs: select optional date range to calculate stats over
+
+    Returns: difference between start weight and latest recorded weight
+
+    """
     x, y = get_records(**kwargs)
     return y[len(y) - 1] - y[0]
-
-
-"""Collects k,v data from current csv file, 
-converts to sorted list of datetime objects
-Optional kwargs allows you to select timerange
-"""
-
 
 def get_records(**kwargs):
     d = {}
@@ -119,34 +113,50 @@ def lookup_record(date_str):
 
     return ""  # returns empty str if date not found or missing weight
 
-
-"""Replaces weight value for existing record
-and overwrites the csv
-"""
-
-
 def replace_value(date, new_weight):
+    """Replaces the previously recorded weight with a new measurement.
+
+    Args:
+        date: date selected
+        new_weight: new weight
+
+    Returns:
+
+    """
     log = []
     with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
         for row in records:
-            d, w = row[0], row[1]
+            d, w = row[0], row[1]  # unchanged values are collected in a new log
             if d == date:
-                w = new_weight
+                w = new_weight  # and the new value is also added
             log.append({"date": d, "weight in lbs": w})
 
+    # overwrites the csv with updated log
     with open(const.LOGFILENAME, 'w', newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerows(log)
 
-
 def write_new_data(d, w):
+    """Appends a new record (date, weight) to the csv.
+
+    Args:
+        d: date selected
+        w: weight recorded
+
+    Returns:
+
+    """
     with open(const.LOGFILENAME, 'a+', newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerow({"date": d, "weight in lbs": w})
 
-
 def email_report():
+    """Emails png of latest plot to recipients
+
+    Returns:
+
+    """
     receiver = "fong.faye@gmail.com"
     body = "This message was generated automatically to" \
            " send you an updated report on Faye's weight loss journey. " \
