@@ -31,8 +31,8 @@ class App(tk.Tk):
 
         # create icons
         # load images
-        load1 = Image.open("misc/redarrow.png")
-        load2 = Image.open("misc/greenarrow.png")
+        load1 = Image.open("images/redarrow.png")
+        load2 = Image.open("images/greenarrow.png")
         # resize images to fit
         resize1 = load1.resize((30,30), Image.ANTIALIAS)
         resize2 = load2.resize((30,30), Image.ANTIALIAS)
