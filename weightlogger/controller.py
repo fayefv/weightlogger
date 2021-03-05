@@ -1,16 +1,22 @@
-"""Defines the controller functions for weightlogger app
+"""This module defines the controller functions for weightlogger app.
+
 @author fayefong
 """
 import yagmail
 import tkinter as tk
 import csv
 import os
-from datetime import datetime
 import constant as const
 from enum import Enum
-from datetime import datetime, timedelta
+from datetime import datetime
+
 
 class ViewMode(Enum):
+    """Enumerates allowed view modes for data.
+
+    Presently, data may be viewed over all-time or over the previous week.
+
+    """
     ALL_TIME = 1
     WEEK = 2
 
@@ -19,91 +25,106 @@ def calc_trend(**kwargs):
     """Calculates useful statistics. May be expanded for more sophisticated stats.
 
     Args:
-        **kwargs: select optional date range to calculate stats over
+        **kwargs: optional date range to calculate stats over, may specify start and end dates
 
-    Returns: difference between start weight and latest recorded weight
+    Returns: difference between weight over specified date range
 
     """
     x, y = get_records(**kwargs)
     return y[len(y) - 1] - y[0]
 
+
 def get_records(**kwargs):
+    """Gets the chronologically sorted records for a selected date range.
+
+    Args:
+        **kwargs: optional date range to get records, may specify start and end dates
+
+    Returns: a list of dates and a list of corresponding weights that are sorted chronologically
+
+    """
     d = {}
     with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
         for row in records:  # grabs data from CSV and puts into k,v in dict
-            d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # strs to datetime and float weights
+            d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # convert str to datetime objects
 
-    sorted_dates = sorted(d)  # returns sorted list of keys
-    if len(kwargs) > 0:  # select dates within specified timerange
+    selected_dates = d.keys()
+    if len(kwargs) > 0:
         time_st = kwargs['start']
         time_end = kwargs['end']
-        sorted_dates = [d for d in sorted_dates if d >= time_st and d <= time_end]
+        # filter for records within specified timerange
+        selected_dates = [d for d in selected_dates if time_st <= d <= time_end]
+
+    sorted_dates = sorted(selected_dates)  # returns sorted list of datetime keys
     sorted_weights = [d[k] for k in sorted_dates]
 
     return sorted_dates, sorted_weights
 
 
-"""Handles submit button clicks by appropriately modifying CSV file
-"""
+def submit_handler(date_recorded, weight):
+    """Adds or modifies the weight recorded for a selected date.
 
+    Args:
+        date_recorded: selected date
+        weight: weight recorded
 
-def submit_handler(d, w):
-    date_recorded = d
-    weight = w
+    Returns: color str to grey out the weight entry box to indicate that the weight has been updated
 
-    # deletes an existing record
-    # makes more sense when you bind keypress event
-    if weight == "":
+    """
+    if weight == "":  # entering an empty str deletes an existing record
         delete_record(date_recorded)
-        return "grey"  # user will not see change but View code needs return color str
+        return "grey"  # no visible effect but weightlogger module requires return color str
 
     try:  # validates weight input
         float(weight)
 
         if lookup_record(date_recorded) != "":  # modifies an existing record
             replace_value(date_recorded, weight)
-        else:  # appends a new record to the csv
-            # print("appended")
+        else:  # appends a new record
             write_new_data(date_recorded, weight)
 
         return "grey"  # greys out the text when new value is submitted
     except ValueError:
-        tk.messagebox.showerror("Error", "Not a valid weight value.")  # do nothing so user can try again
-
-
-"""Deletes a record from the csv
-"""
+        tk.messagebox.showerror("Error", "Not a valid weight value.")  # warns user so they can try again
 
 
 def delete_record(del_this_date):
+    """Deletes the record for the selected date.
+
+    Args:
+        del_this_date: date selected for deletion
+
+    """
     log = []
     with open(const.LOGFILENAME, 'r') as csvfile:
         records = csv.reader(csvfile, delimiter=',')
         for row in records:
-            if row[0] != del_this_date:  # collect every row except the deletion date
+            if row[0] != del_this_date:  # collects every row except the deletion date
                 log.append({"date": row[0], "weight in lbs": row[1]})
 
-    with open(const.LOGFILENAME, 'w', newline="") as csvfile:
+    with open(const.LOGFILENAME, 'w', newline="") as csvfile:  # overwrites the log file
         writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerows(log)
 
 
-"""Looks up the weight for a specific date.
-Used to populate entry box
-And also to handle new submissions
-"""
-
-
 def lookup_record(date_str):
-    # handles file not found case
+    """Gets the previously recorded weight for a selected date.
+
+    Args:
+        date_str: date of interest
+
+    Returns: the previously recorded weight or the empty str if no record exists
+
+    """
+    # handles log file not found case
     try:
         csv_file = csv.reader(open(const.LOGFILENAME, 'r'), delimiter=',')
     except FileNotFoundError:
         with open(const.LOGFILENAME, 'w') as csv_file:
             return ""
 
-    # handles empty file case
+    # handles empty log file case
     if os.stat(const.LOGFILENAME).st_size == 0:
         return ""
 
@@ -113,14 +134,13 @@ def lookup_record(date_str):
 
     return ""  # returns empty str if date not found or missing weight
 
+
 def replace_value(date, new_weight):
     """Replaces the previously recorded weight with a new measurement.
 
     Args:
         date: date selected
         new_weight: new weight
-
-    Returns:
 
     """
     log = []
@@ -129,7 +149,7 @@ def replace_value(date, new_weight):
         for row in records:
             d, w = row[0], row[1]  # unchanged values are collected in a new log
             if d == date:
-                w = new_weight  # and the new value is also added
+                w = new_weight  # and the new value is also added, preserving order
             log.append({"date": d, "weight in lbs": w})
 
     # overwrites the csv with updated log
@@ -137,37 +157,33 @@ def replace_value(date, new_weight):
         writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
         writer.writerows(log)
 
-def write_new_data(d, w):
+
+def write_new_data(date, weight):
     """Appends a new record (date, weight) to the csv.
 
     Args:
-        d: date selected
-        w: weight recorded
-
-    Returns:
+        date: date selected
+        weight: weight recorded
 
     """
     with open(const.LOGFILENAME, 'a+', newline="") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=const.FIELDS)
-        writer.writerow({"date": d, "weight in lbs": w})
+        writer.writerow({"date": date, "weight in lbs": weight})
+
 
 def email_report():
-    """Emails png of latest plot to recipients
-
-    Returns:
-
-    """
-    receiver = "fong.faye@gmail.com"
+    """Emails weights log file and png of latest plot to recipients"""
+    receivers = ["fong.faye@gmail.com"]
     body = "This message was generated automatically to" \
            " send you an updated report on Faye's weight loss journey. " \
            "Please see attached."
-    filename = const.OUTPUTFILENAME
+    filenames = [const.GRAPH_FILENAME, const.LOGFILENAME]
 
     # send email attachment of png figure
     yag = yagmail.SMTP("faye.vainsencher@gmail.com")
     yag.send(
-        to=receiver,
+        to=receivers,
         subject="AUTOGENERATED hotness report",
         contents=body,
-        attachments=filename
+        attachments=filenames
     )
