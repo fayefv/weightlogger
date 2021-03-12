@@ -1,0 +1,5 @@
+include weightlogger/images/*.png
+include weightlogger/data/*.png
+include weightlogger/data/*.csv
+include LICENSE
+include requirements.txt
