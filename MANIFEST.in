@@ -3,3 +3,4 @@ include weightlogger/data/*.png
 include weightlogger/data/*.csv
 include LICENSE
 include requirements.txt
+include supporting_graphic.png

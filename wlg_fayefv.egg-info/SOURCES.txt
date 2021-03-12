@@ -4,6 +4,7 @@ README.md
 pyproject.toml
 requirements.txt
 setup.py
+supporting_graphic.png
 weightlogger/__init__.py
 weightlogger/app.py
 weightlogger/constant.py

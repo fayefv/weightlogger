@@ -1,14 +1,18 @@
 Metadata-Version: 2.1
 Name: wlg-fayefv
-Version: 0.1.6
+Version: 0.1.7
 Summary: A simple weightlogging app to track personal fitness.
 Home-page: https://github.com/fayefv/weightlogger/tree/prettyGUI
 Author: Faye Fong
 Author-email: fong.faye@gmail.com
 License: UNKNOWN
-Description: <h1>WeightLogger</h1>
+Description: 
+        <h1>WeightLogger</h1>
         <h3>A simple app to monitor personal fitness.</h3>
         <br>
+        
+        ![demo](supporting_graphic.png)
+        
         <p> User may record body weight by selecting 
         or entering a calendar date.  Body weight
         is plotted over all time or just the 
@@ -18,6 +22,7 @@ Description: <h1>WeightLogger</h1>
         <br>
         <p>Future improvements may include more
         advanced statistics in the trends section.</p>
+        
         
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
