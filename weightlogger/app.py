@@ -8,12 +8,13 @@ import tkinter.font as font
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.ticker as ticker
-import controller as ct
 from matplotlib.dates import DateFormatter
-import constant as const
 from datetime import datetime, timedelta
-from controller import ViewMode
 from PIL import Image, ImageTk
+import weightlogger.controller as ct
+import weightlogger.constant as const
+from weightlogger.controller import ViewMode
+import pathlib
 
 
 class App(tk.Tk):
@@ -38,8 +39,8 @@ class App(tk.Tk):
 
         # create trend icons
         # load images
-        load1 = Image.open("images/redarrow.png")
-        load2 = Image.open("images/greenarrow.png")
+        load1 = Image.open(pathlib.Path(__file__).parent/"images/redarrow.png")
+        load2 = Image.open(pathlib.Path(__file__).parent/"images/greenarrow.png")
         # resize images to fit
         resize1 = load1.resize((30, 30), Image.ANTIALIAS)
         resize2 = load2.resize((30, 30), Image.ANTIALIAS)

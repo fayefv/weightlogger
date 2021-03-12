@@ -1,7 +1,0 @@
-README.md
-pyproject.toml
-setup.py
-wlogger_fayefv.egg-info/PKG-INFO
-wlogger_fayefv.egg-info/SOURCES.txt
-wlogger_fayefv.egg-info/dependency_links.txt
-wlogger_fayefv.egg-info/top_level.txt

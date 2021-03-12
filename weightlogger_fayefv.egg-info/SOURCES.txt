@@ -1,7 +1,0 @@
-README.md
-pyproject.toml
-setup.py
-weightlogger_fayefv.egg-info/PKG-INFO
-weightlogger_fayefv.egg-info/SOURCES.txt
-weightlogger_fayefv.egg-info/dependency_links.txt
-weightlogger_fayefv.egg-info/top_level.txt
