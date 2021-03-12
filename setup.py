@@ -15,7 +15,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="wlg_fayefv", # Replace with your own username
-    version="0.1.7",
+    version="0.1.8",
     install_requires=requirements,
     author="Faye Fong",
     author_email="fong.faye@gmail.com",
