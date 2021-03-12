@@ -1,16 +1,22 @@
 import setuptools
+import pathlib
+import re
+
+
+requirements = []
+with open(pathlib.Path(__file__).parent.parent/"requirements.txt", "r") as rf:
+    for line in rf:
+        requirements.append(re.split(r'[<>=]', line)[0])
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-# with open("requirements.txt", "r") as rf:
-#     requirements = rf.read().splitlines()
-# causes pip to abort if it cannot find everything it needs
-# so keep requirements separate
 
 setuptools.setup(
     name="wlg_fayefv", # Replace with your own username
-    version="0.1.5",
+    version="0.1.6",
+    install_requires=requirements,
     author="Faye Fong",
     author_email="fong.faye@gmail.com",
     description="A simple weightlogging app to track personal fitness.",

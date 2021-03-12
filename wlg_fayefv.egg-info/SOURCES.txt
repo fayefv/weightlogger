@@ -2,6 +2,7 @@ LICENSE
 MANIFEST.in
 README.md
 pyproject.toml
+requirements.txt
 setup.py
 weightlogger/__init__.py
 weightlogger/app.py
@@ -11,8 +12,8 @@ weightlogger/data/weightlog.csv
 weightlogger/data/weightlog.png
 weightlogger/images/greenarrow.png
 weightlogger/images/redarrow.png
-weightlogger/requirements/requirements.txt
 wlg_fayefv.egg-info/PKG-INFO
 wlg_fayefv.egg-info/SOURCES.txt
 wlg_fayefv.egg-info/dependency_links.txt
+wlg_fayefv.egg-info/requires.txt
 wlg_fayefv.egg-info/top_level.txt
