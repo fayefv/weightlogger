@@ -11,6 +11,7 @@ from enum import Enum
 from datetime import datetime
 import weightlogger.constant as const
 
+
 class ViewMode(Enum):
     """Enumerates allowed view modes for data.
 
@@ -31,7 +32,7 @@ def calc_trend(**kwargs):
 
     """
     x, y = get_records(**kwargs)
-    return y[len(y) - 1] - y[0] if len(y) > 0 else 0  # Index out of bounds error tbf
+    return y[len(y) - 1] - y[0] if len(y) > 1 else const.NOTRENDFLAG  # Not enough data to calculate trend
 
 
 def get_records(**kwargs):
@@ -44,10 +45,14 @@ def get_records(**kwargs):
 
     """
     d = {}
-    with open(const.LOGFILENAME, 'r') as csvfile:
-        records = csv.reader(csvfile, delimiter=',')
-        for row in records:  # grabs data from CSV and puts into k,v in dict
-            d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # convert str to datetime objects
+    try:  # handles log file not found case
+        with open(const.LOGFILENAME, 'r') as csvfile:
+            records = csv.reader(csvfile, delimiter=',')
+            for row in records:  # grabs data from CSV and puts into k,v in dict
+                d[datetime.strptime(row[0], '%b-%d-%Y')] = float(row[1])  # convert str to datetime objects
+    except FileNotFoundError:
+        with open(const.LOGFILENAME, 'w') as csv_file:
+            return [], []
 
     selected_dates = d.keys()
     if len(kwargs) > 0:

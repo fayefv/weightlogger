@@ -39,8 +39,8 @@ class App(tk.Tk):
 
         # create trend icons
         # load images
-        load1 = Image.open(pathlib.Path(__file__).parent/"images/redarrow.png")
-        load2 = Image.open(pathlib.Path(__file__).parent/"images/greenarrow.png")
+        load1 = Image.open(pathlib.Path(__file__).parent / "images/redarrow.png")
+        load2 = Image.open(pathlib.Path(__file__).parent / "images/greenarrow.png")
         # resize images to fit
         resize1 = load1.resize((30, 30), Image.ANTIALIAS)
         resize2 = load2.resize((30, 30), Image.ANTIALIAS)
@@ -132,6 +132,9 @@ class App(tk.Tk):
         self.plt.yaxis.set_major_locator(ticker.NullLocator())  # for cleaner startup view
         self.plt.set_title("Weight Change over Time")
 
+        img = self.plt.get_figure()  # generates a blank plot png
+        img.savefig(const.GRAPH_FILENAME)
+
     def show_graph(self):
         """Plots data from a specified date range."""
         # set up a new embedded plot
@@ -165,14 +168,17 @@ class App(tk.Tk):
         This method will be triggered after any change to the log csv.
 
         Args:
-            date_range: date range of interest, only allowed too view over ALL TIME or previous WEEK
+            date_range: date range of interest, only allowed to view over ALL TIME or previous WEEK
 
         Returns: weight change (to 1 decimal place)
 
         """
-        val = 0
+        val = None
         if date_range == ViewMode.ALL_TIME:
             val = ct.calc_trend()
+            if val == const.NOTRENDFLAG:  # displays nothing when trend cannot be calculated
+                self.all_icon.config(image="")
+                return ""
 
             # sets the corresponding icon
             self.all_icon.config(image=self.green_arr_img if val < 0 else self.red_arr_img if val > 0 else "")
@@ -180,6 +186,9 @@ class App(tk.Tk):
 
         elif date_range == ViewMode.WEEK:
             val = ct.calc_trend(start=self.lastweek, end=self.today)
+            if val == const.NOTRENDFLAG:  # displays nothing when trend cannot be calculated
+                self.week_icon.config(image="")
+                return ""
 
             # sets the corresponding icon
             self.week_icon.config(image=self.green_arr_img if val < 0 else self.red_arr_img if val > 0 else "")
