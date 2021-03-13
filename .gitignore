@@ -3,4 +3,6 @@ weightlogger/data/
 build/
 dist/
 wlg_fayefv.egg-info/
-
+MANIFEST.in
+pyproject.toml
+setup.py
