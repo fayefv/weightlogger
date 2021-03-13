@@ -1,9 +1,8 @@
-
 <h1>WeightLogger</h1>
 <h3>A simple app to monitor personal fitness.</h3>
 <br>
 
-![demo](supporting_graphic.png)
+![demo](https://github.com/fayefv/weightlogger/blob/master/supporting_graphic.png?raw=true)
 
 <p> User may record body weight by selecting 
 or entering a calendar date.  Body weight
