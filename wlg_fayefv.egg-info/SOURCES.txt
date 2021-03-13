@@ -9,6 +9,8 @@ weightlogger/__init__.py
 weightlogger/app.py
 weightlogger/constant.py
 weightlogger/controller.py
+weightlogger/data/weightlog.csv
+weightlogger/data/weightlog.png
 weightlogger/images/greenarrow.png
 weightlogger/images/redarrow.png
 wlg_fayefv.egg-info/PKG-INFO
