@@ -6,6 +6,7 @@ import yagmail
 import tkinter as tk
 import csv
 import os
+import pathlib
 
 from enum import Enum
 from datetime import datetime
@@ -182,7 +183,9 @@ def email_report():
     body = "This message was generated automatically to" \
            " send you an updated report on Faye's weight loss journey. " \
            "Please see attached."
-    filenames = [const.GRAPH_FILENAME, const.LOGFILENAME]
+    filenames = [const.LOGFILENAME]
+    if pathlib.Path(const.GRAPH_FILENAME).is_file():
+        filenames.append(const.GRAPH_FILENAME)
 
     # send email attachment of png figure
     yag = yagmail.SMTP("faye.vainsencher@gmail.com")

@@ -23,6 +23,9 @@ class App(tk.Tk):
     def __init__(self):  # widgets are attributes of the class
         super().__init__()
 
+        # make empty directory for data
+        pathlib.Path(__file__).parent.joinpath('data').mkdir(exist_ok=True)
+
         # sets commonly used time variables
         self.today = datetime.today()
         delta = timedelta(weeks=1)
@@ -131,9 +134,6 @@ class App(tk.Tk):
         self.plt.xaxis.set_major_locator(ticker.NullLocator())  # turns off x, y labels and ticks
         self.plt.yaxis.set_major_locator(ticker.NullLocator())  # for cleaner startup view
         self.plt.set_title("Weight Change over Time")
-
-        img = self.plt.get_figure()  # generates a blank plot png
-        img.savefig(const.GRAPH_FILENAME)
 
     def show_graph(self):
         """Plots data from a specified date range."""
