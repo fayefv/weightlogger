@@ -1,8 +1,8 @@
 Metadata-Version: 2.1
 Name: wlg-fayefv
-Version: 0.2.0
+Version: 0.2.2
 Summary: A simple weightlogging app to track personal fitness.
-Home-page: https://github.com/fayefv/weightlogger/tree/prettyGUI
+Home-page: https://github.com/fayefv/weightlogger
 Author: Faye Fong
 Author-email: fong.faye@gmail.com
 License: UNKNOWN
