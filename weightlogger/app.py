@@ -81,12 +81,12 @@ class App(tk.Tk):
         # bind keypress events for intuitive data entry
         self.e_w.bind("<Key>", self.handle_keypress)
 
-        # action buttons that do not modify log: "Quit", "Report"
+        # action buttons that do not modify log: "Quit", "Save"
         button_style = font.Font(family="Arial", size=25, weight='bold')
         self.quit_btn = tk.Button(self, text="Quit", font=button_style, command=self.quit)
-        self.quit_btn.grid(row=2, column=0, pady=10, padx=50, ipadx=20, ipady=10)
-        self.report_btn = tk.Button(self, text='Report', font=button_style, command=self.send_report)
-        self.report_btn.grid(row=3, column=0, pady=10, padx=50, ipady=10)
+        self.quit_btn.grid(row=2, column=0, pady=10, padx=50, ipadx=60, ipady=10)
+        self.save_btn = tk.Button(self, text="Save", font=button_style, command=self.open_data_folder)
+        self.save_btn.grid(row=3, column=0, pady=10, padx=50, ipadx=55, ipady=10)
 
         # action buttons that modify log: "Submit", "Plot"
         self.submit_btn = tk.Button(self, text="Submit", font=button_style, command=self.submit_handler)
@@ -304,9 +304,10 @@ class App(tk.Tk):
         self.update_trend()  # recalculates statistics report based on new data
 
     @staticmethod
-    def send_report():
-        """Emails log and graph of current plot to recipients."""
-        ct.email_report()
+    def open_data_folder():
+        """Opens the data folder for user to examine and/or save-as current log and plot elsewhere."""
+        ct.get_data_report()
+        # TODO change this to a save-as dialog
 
 
 if __name__ == '__main__':
