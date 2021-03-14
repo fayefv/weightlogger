@@ -4,10 +4,10 @@ import re
 
 
 requirements = []
-with open(pathlib.Path(__file__).parent/"requirements.txt", "r") as rf:
+pathtoreq = pathlib.Path(__file__).parent / "requirements.txt"
+with open(pathtoreq, "r") as rf:
     for line in rf:
         requirements.append(re.split(r'[<>=]', line)[0])
-
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -15,7 +15,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="wlg_fayefv", # Replace with your own username
-    version="0.2.5",
+    version="0.2.6",
     install_requires=requirements,
     author="Faye Fong",
     author_email="fong.faye@gmail.com",
