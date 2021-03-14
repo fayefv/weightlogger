@@ -4,7 +4,7 @@ import re
 
 
 requirements = []
-with open(pathlib.Path(__file__).parent.parent/"requirements.txt", "r") as rf:
+with open(pathlib.Path(__file__).parent/"requirements.txt", "r") as rf:
     for line in rf:
         requirements.append(re.split(r'[<>=]', line)[0])
 
