@@ -1,4 +1,4 @@
 include weightlogger/images/*.png
 include LICENSE
 include requirements.txt
-include supporting_graphic.png
+include demo.png
