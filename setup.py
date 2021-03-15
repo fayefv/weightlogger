@@ -15,7 +15,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="wlg_fayefv", # Replace with your own username
-    version="0.2.7",
+    version="0.3.0",
     install_requires=requirements,
     author="Faye Fong",
     author_email="fong.faye@gmail.com",
@@ -26,7 +26,7 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS :: Independent",
+        "Operating System :: OS Independent",
     ],
     include_package_data=True,
     packages=setuptools.find_packages(),
