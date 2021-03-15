@@ -3,6 +3,7 @@
 @author fayefong
 """
 import tkinter as tk
+from tkinter import filedialog
 from tkcalendar import DateEntry
 import tkinter.font as font
 from matplotlib.figure import Figure
@@ -11,10 +12,10 @@ import matplotlib.ticker as ticker
 from matplotlib.dates import DateFormatter
 from datetime import datetime, timedelta
 from PIL import Image, ImageTk
+import pathlib
 import weightlogger.controller as ct
 import weightlogger.constant as const
 from weightlogger.controller import ViewMode
-import pathlib
 
 
 class App(tk.Tk):
@@ -81,12 +82,12 @@ class App(tk.Tk):
         # bind keypress events for intuitive data entry
         self.e_w.bind("<Key>", self.handle_keypress)
 
-        # action buttons that do not modify log: "Quit", "Report"
+        # action buttons that do not modify log: "Quit", "Save"
         button_style = font.Font(family="Arial", size=25, weight='bold')
         self.quit_btn = tk.Button(self, text="Quit", font=button_style, command=self.quit)
-        self.quit_btn.grid(row=2, column=0, pady=10, padx=50, ipadx=20, ipady=10)
-        self.report_btn = tk.Button(self, text='Report', font=button_style, command=self.send_report)
-        self.report_btn.grid(row=3, column=0, pady=10, padx=50, ipady=10)
+        self.quit_btn.grid(row=2, column=0, pady=10, padx=50, ipadx=60, ipady=10)
+        self.save_btn = tk.Button(self, text="Save", font=button_style, command=self.save_report)
+        self.save_btn.grid(row=3, column=0, pady=10, padx=50, ipadx=55, ipady=10)
 
         # action buttons that modify log: "Submit", "Plot"
         self.submit_btn = tk.Button(self, text="Submit", font=button_style, command=self.submit_handler)
@@ -304,9 +305,9 @@ class App(tk.Tk):
         self.update_trend()  # recalculates statistics report based on new data
 
     @staticmethod
-    def send_report():
-        """Emails log and graph of current plot to recipients."""
-        ct.email_report()
+    def save_report():
+        """Saves fitness report to a chosen folder."""
+        ct.save_report()
 
 
 if __name__ == '__main__':

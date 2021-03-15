@@ -2,7 +2,7 @@
 """
 import pathlib
 
-LOGFILENAME = pathlib.Path(__file__).parent/"data/weightlog.csv"
+LOGFILENAME = pathlib.Path(__file__).parent / "data/weightlog.csv"
 FIELDS = ["date", "weight in lbs"]
-GRAPH_FILENAME = pathlib.Path(__file__).parent/"data/weightlog.png"
+GRAPH_FILENAME = pathlib.Path(__file__).parent / "data/weightlog.png"
 NOTRENDFLAG = 10000
