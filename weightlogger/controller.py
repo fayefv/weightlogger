@@ -2,14 +2,14 @@
 
 @author fayefong
 """
-import yagmail
+import tkfilebrowser
 import tkinter as tk
 import csv
 import os
 import pathlib
 import platform
 import subprocess
-
+import shutil
 from enum import Enum
 from datetime import datetime
 import weightlogger.constant as const
@@ -179,12 +179,42 @@ def write_new_data(date, weight):
         writer.writerow({"date": date, "weight in lbs": weight})
 
 
-def get_data_report():
-    """Opens data folder for user to examine and/or save-as the current log and plot elsewhere."""
-    path = pathlib.Path(__file__).parent / "data"
+def open_folder_dialog(path):
+    """Opens file explorer.
+
+    Args:
+        path: specified directory
+
+    """
     if platform.system() == "Windows":
         os.startfile(path)
     elif platform.system() == "Darwin":
         subprocess.Popen(["open", path])
     else:  # Linux
         subprocess.Popen(["xdg-open", path])
+
+
+def save_report():
+    """Saves a copy of the fitness report to selected directory."""
+    src_dir = pathlib.Path(__file__).parent / "data"
+    src_files_raw = os.listdir(src_dir)  # gets the report files from data folder
+
+    # opens dialog to choose a destination folder
+    dest_dir = tkfilebrowser.askopendirname(initialdir=pathlib.Path.home(),
+                                            title="Choose Directory to Save to...")
+    if dest_dir == "":  # do nothing if user cancels
+        return
+
+    # make new report folder in chosen directory
+    suffix = datetime.now().strftime("%Y%m%d_%H-%M-%S")
+    dir_name = "Report_" + suffix  # ensures unique report name to prevent overwrite
+    report_dir = os.path.join(dest_dir, dir_name)
+    os.mkdir(path=report_dir)
+
+    # copies files to new folder
+    for f in src_files_raw:
+        src_file = pathlib.Path(src_dir).joinpath(f)
+        shutil.copy2(src_file, report_dir)
+
+    # open new report folder
+    open_folder_dialog(report_dir)

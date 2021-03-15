@@ -3,6 +3,7 @@
 @author fayefong
 """
 import tkinter as tk
+from tkinter import filedialog
 from tkcalendar import DateEntry
 import tkinter.font as font
 from matplotlib.figure import Figure
@@ -11,10 +12,10 @@ import matplotlib.ticker as ticker
 from matplotlib.dates import DateFormatter
 from datetime import datetime, timedelta
 from PIL import Image, ImageTk
+import pathlib
 import weightlogger.controller as ct
 import weightlogger.constant as const
 from weightlogger.controller import ViewMode
-import pathlib
 
 
 class App(tk.Tk):
@@ -85,7 +86,7 @@ class App(tk.Tk):
         button_style = font.Font(family="Arial", size=25, weight='bold')
         self.quit_btn = tk.Button(self, text="Quit", font=button_style, command=self.quit)
         self.quit_btn.grid(row=2, column=0, pady=10, padx=50, ipadx=60, ipady=10)
-        self.save_btn = tk.Button(self, text="Save", font=button_style, command=self.open_data_folder)
+        self.save_btn = tk.Button(self, text="Save", font=button_style, command=self.save_report)
         self.save_btn.grid(row=3, column=0, pady=10, padx=50, ipadx=55, ipady=10)
 
         # action buttons that modify log: "Submit", "Plot"
@@ -304,10 +305,9 @@ class App(tk.Tk):
         self.update_trend()  # recalculates statistics report based on new data
 
     @staticmethod
-    def open_data_folder():
-        """Opens the data folder for user to examine and/or save-as current log and plot elsewhere."""
-        ct.get_data_report()
-        # TODO change this to a save-as dialog
+    def save_report():
+        """Saves fitness report to a chosen folder."""
+        ct.save_report()
 
 
 if __name__ == '__main__':
